@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { createPost } from "@/api/posts/add";
-import { Categories, CategoryValue } from "@/constants/categories";
+import { Categories } from "@/constants/categories";
 
 export default function NewPostPage() {
   const router = useRouter();
