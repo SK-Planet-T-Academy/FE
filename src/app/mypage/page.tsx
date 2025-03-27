@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { format } from "date-fns";
+import { logoutUser } from "@/api/auth/logout"; // 🔸 로그아웃 API 임포트
+import { useRouter } from "next/navigation";
 
 interface Post {
   id: number;
@@ -26,10 +28,11 @@ interface Comment {
 const userId = "user123"; // 임시 사용자 ID
 
 export default function MyPage() {
+  const router = useRouter();
+
   const [userPosts, setUserPosts] = useState<Post[]>([]);
   const [likedPosts, setLikedPosts] = useState<Post[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
-
   const [activeSection, setActiveSection] = useState<
     "edit" | "posts" | "likes" | "comments"
   >("edit");
@@ -71,20 +74,25 @@ export default function MyPage() {
     setComments(allComments.filter((c) => c.author === userId));
   }, []);
 
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+      alert("로그아웃 되었습니다.");
+      router.push("/login");
+    } catch (err) {
+      alert("로그아웃 중 오류가 발생했습니다.");
+    }
+  };
+
   return (
     <div className="max-w-3xl mx-auto py-10 px-4 space-y-8">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">👤 마이페이지</h1>
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={() => alert("로그아웃!")}
-        >
+        <Button variant="destructive" size="sm" onClick={handleLogout}>
           로그아웃
         </Button>
       </div>
 
-      {/* 탭 버튼 */}
       <div className="flex flex-wrap gap-2">
         <Button
           variant={activeSection === "edit" ? "default" : "outline"}
@@ -112,7 +120,6 @@ export default function MyPage() {
         </Button>
       </div>
 
-      {/* 섹션별 내용 */}
       {activeSection === "edit" && (
         <section>
           <h2 className="text-xl font-semibold mb-4">✏️ 유저 정보 수정</h2>
