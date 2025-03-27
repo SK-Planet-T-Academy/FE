@@ -1,0 +1,30 @@
+/* Pretendard Variable 폰트 불러오기 */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.css");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* === 전역 컬러 변수 설정 === */
+:root {
+  --background: #f9fafb;
+  --foreground: #1f2937;
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --muted: #6b7280;
+}
+
+/* === 기본 배경 & 폰트 스타일 === */
+body {
+  @apply bg-[--background] text-[--foreground] font-sans;
+  font-family: "Pretendard Variable", sans-serif;
+}
+
+/* === 제목 계열 공통 스타일 === */
+h1,
+h2,
+h3,
+h4,
+h5 {
+  @apply font-semibold text-[--foreground];
+}
