@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -27,8 +26,6 @@ interface Comment {
 const userId = "user123"; // 임시 사용자 ID
 
 export default function MyPage() {
-  const router = useRouter();
-
   const [userPosts, setUserPosts] = useState<Post[]>([]);
   const [likedPosts, setLikedPosts] = useState<Post[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
