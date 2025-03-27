@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { format } from "date-fns";
 import { logoutUser } from "@/api/auth/logout"; // 🔸 로그아웃 API 임포트
 import { useRouter } from "next/navigation";
+import { getUserById } from "@/api/user/getUser";
 
 interface Post {
   id: number;
@@ -25,8 +26,6 @@ interface Comment {
   createdAt: string;
 }
 
-const userId = "user123"; // 임시 사용자 ID
-
 export default function MyPage() {
   const router = useRouter();
 
@@ -36,6 +35,11 @@ export default function MyPage() {
   const [activeSection, setActiveSection] = useState<
     "edit" | "posts" | "likes" | "comments"
   >("edit");
+
+  const [userInfo, setUserInfo] = useState<{
+    email: string;
+    name: string;
+  } | null>(null);
 
   useEffect(() => {
     const allPosts: Post[] = [
@@ -69,9 +73,16 @@ export default function MyPage() {
       },
     ];
 
-    setUserPosts(allPosts.filter((p) => p.author === userId));
+    setUserPosts(allPosts.filter((p) => p.author === "user123"));
     setLikedPosts(allPosts.filter((p) => [1].includes(p.id)));
-    setComments(allComments.filter((c) => c.author === userId));
+    setComments(allComments.filter((c) => c.author === "user123"));
+
+    const userId = localStorage.getItem("id");
+    if (userId) {
+      getUserById(userId)
+        .then((data) => setUserInfo({ email: data.email, name: data.name }))
+        .catch((err) => console.error("유저 정보 조회 실패:", err));
+    }
   }, []);
 
   const handleLogout = async () => {
@@ -152,7 +163,7 @@ export default function MyPage() {
               <label className="block text-sm font-medium mb-1">이메일</label>
               <input
                 type="email"
-                defaultValue="user123@example.com"
+                defaultValue={userInfo?.email}
                 className="w-full border rounded-md px-3 py-2 text-sm"
               />
             </div>
@@ -160,7 +171,7 @@ export default function MyPage() {
               <label className="block text-sm font-medium mb-1">이름</label>
               <input
                 type="text"
-                defaultValue="홍길동"
+                defaultValue={userInfo?.name}
                 className="w-full border rounded-md px-3 py-2 text-sm"
               />
             </div>
