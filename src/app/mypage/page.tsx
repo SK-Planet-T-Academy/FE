@@ -79,8 +79,12 @@ export default function MyPage() {
       await logoutUser();
       alert("로그아웃 되었습니다.");
       router.push("/login");
-    } catch (err) {
-      alert("로그아웃 중 오류가 발생했습니다.");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        alert(err.message);
+      } else {
+        alert("로그아웃 중 오류가 발생했습니다.");
+      }
     }
   };
 

@@ -44,8 +44,12 @@ export default function LoginPage() {
     try {
       await loginUser({ email, password });
       router.push("/board");
-    } catch (err: any) {
-      setError(err.message || "로그인에 실패했습니다.");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message || "로그인에 실패했습니다.");
+      } else {
+        setError("알 수 없는 오류가 발생했습니다.");
+      }
     }
   };
 
