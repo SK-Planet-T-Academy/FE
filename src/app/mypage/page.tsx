@@ -75,8 +75,14 @@ export default function MyPage() {
   }, []);
 
   const handleLogout = async () => {
+    const userId = localStorage.getItem("id");
+
+    if (!userId) {
+      alert("로그인 상태가 아닙니다.");
+      return;
+    }
     try {
-      const response = await logoutUser();
+      const response = await logoutUser(Number(userId));
 
       if (response.isLogin === false) {
         localStorage.removeItem("id");

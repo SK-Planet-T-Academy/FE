@@ -1,9 +1,7 @@
-// src/api/auth/logout.ts
-
-export async function logoutUser() {
+export async function logoutUser(id: number) {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/users/logout`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/users/logout/${id}`,
       {
         method: "POST",
       }
