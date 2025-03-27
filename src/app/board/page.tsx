@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ko } from "date-fns/locale";
-import { Eye, Heart } from "lucide-react";
+import { Eye, Heart, HeartIcon } from "lucide-react";
 
 interface Post {
   id: number;
@@ -69,28 +69,32 @@ export default function BoardPage() {
   );
 
   const handleLike = (postId: number) => {
-    const alreadyLiked = likedMap[postId]?.has(userId);
-
-    if (alreadyLiked) {
-      setModalMessage("이미 좋아요를 누르셨습니다.");
-      setLikeModal(true);
-      return;
-    }
+    const isLiked = likedMap[postId]?.has(userId);
 
     setPosts((prev) =>
-      prev.map((post) =>
-        post.id === postId ? { ...post, likes: post.likes + 1 } : post
-      )
+      prev.map((post) => {
+        if (post.id !== postId) return post;
+        return {
+          ...post,
+          likes: isLiked ? post.likes - 1 : post.likes + 1,
+        };
+      })
     );
 
     setLikedMap((prev) => {
       const updated = { ...prev };
       if (!updated[postId]) updated[postId] = new Set();
-      updated[postId].add(userId);
+      if (isLiked) {
+        updated[postId].delete(userId);
+      } else {
+        updated[postId].add(userId);
+      }
       return updated;
     });
 
-    setModalMessage("좋아요가 등록되었습니다!");
+    setModalMessage(
+      isLiked ? "좋아요가 취소되었습니다." : "좋아요가 등록되었습니다!"
+    );
     setLikeModal(true);
   };
 
@@ -140,40 +144,47 @@ export default function BoardPage() {
               선택된 날짜에 게시글이 없습니다.
             </p>
           ) : (
-            filteredPosts.map((post) => (
-              <Card
-                key={post.id}
-                className="transition-all duration-300 hover:shadow-lg hover:scale-[1.01]"
-              >
-                <CardContent className="p-4 space-y-2">
-                  <div className="flex justify-between items-center">
-                    <h3 className="font-bold text-lg">{post.title}</h3>
-                    <span className="text-xs text-gray-500">
-                      {format(new Date(post.date), "yyyy.MM.dd")}
-                    </span>
-                  </div>
-
-                  <p className="text-sm text-gray-600">{post.content}</p>
-
-                  <div className="flex justify-between items-center text-sm text-muted-foreground">
-                    <span>작성자: {post.author}</span>
-                    <div className="flex items-center gap-3">
-                      <span className="flex items-center gap-1">
-                        <Eye className="w-4 h-4" />
-                        {post.views}
+            filteredPosts.map((post) => {
+              const isLiked = likedMap[post.id]?.has(userId);
+              return (
+                <Card
+                  key={post.id}
+                  className="transition-all duration-300 hover:shadow-lg hover:scale-[1.01]"
+                >
+                  <CardContent className="p-4 space-y-2">
+                    <div className="flex justify-between items-center">
+                      <h3 className="font-bold text-lg">{post.title}</h3>
+                      <span className="text-xs text-gray-500">
+                        {format(new Date(post.date), "yyyy.MM.dd")}
                       </span>
-                      <button
-                        onClick={() => handleLike(post.id)}
-                        className="flex items-center gap-1 hover:text-red-500 transition"
-                      >
-                        <Heart className="w-4 h-4" />
-                        {post.likes}
-                      </button>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
+
+                    <p className="text-sm text-gray-600">{post.content}</p>
+
+                    <div className="flex justify-between items-center text-sm text-muted-foreground">
+                      <span>작성자: {post.author}</span>
+                      <div className="flex items-center gap-3">
+                        <span className="flex items-center gap-1">
+                          <Eye className="w-4 h-4" />
+                          {post.views}
+                        </span>
+                        <button
+                          onClick={() => handleLike(post.id)}
+                          className="flex items-center gap-1 hover:text-red-500 transition"
+                        >
+                          <Heart
+                            className={`w-4 h-4 ${
+                              isLiked ? "fill-red-500 text-red-500" : ""
+                            }`}
+                          />
+                          {post.likes}
+                        </button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })
           )}
         </div>
       </div>
