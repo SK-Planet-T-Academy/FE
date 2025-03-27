@@ -57,7 +57,7 @@ export default function RegisterPage() {
           <Input
             id="name"
             name="name"
-            placeholder="홍길동"
+            placeholder="신강희짱"
             value={form.name}
             onChange={handleChange}
             required
