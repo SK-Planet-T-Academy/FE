@@ -42,10 +42,11 @@ export default function LoginPage() {
     }
 
     try {
-      await loginUser({ email, password });
-      localStorage.setItem("email", email);
-      localStorage.setItem("password", password);
-      localStorage.setItem("isLogin", "true");
+      const response = await loginUser({ email, password });
+
+      // 로그인 성공 시 응답에서 id와 isLogin 추출
+      localStorage.setItem("id", response.id);
+      localStorage.setItem("isLogin", response.isLogin ? "true" : "false");
       router.push("/board");
     } catch (err: unknown) {
       if (err instanceof Error) {

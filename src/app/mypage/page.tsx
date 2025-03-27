@@ -76,9 +76,17 @@ export default function MyPage() {
 
   const handleLogout = async () => {
     try {
-      await logoutUser();
-      alert("로그아웃 되었습니다.");
-      router.push("/login");
+      const response = await logoutUser();
+
+      if (response.isLogin === false) {
+        localStorage.removeItem("id");
+        localStorage.removeItem("isLogin");
+
+        alert("로그아웃 되었습니다.");
+        router.push("/login");
+      } else {
+        alert("로그아웃 상태를 확인할 수 없습니다.");
+      }
     } catch (err: unknown) {
       if (err instanceof Error) {
         alert(err.message);
