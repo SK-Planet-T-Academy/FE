@@ -13,13 +13,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { createPost } from "@/api/posts/add";
+import { Categories, CategoryValue } from "@/constants/categories";
 
 export default function NewPostPage() {
   const router = useRouter();
   const [form, setForm] = useState({
     title: "",
     content: "",
-    category: "", // 카테고리
+    category: "",
   });
 
   const handleChange = (
@@ -33,18 +35,40 @@ export default function NewPostPage() {
     setForm((prev) => ({ ...prev, category: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const userId = localStorage.getItem("id");
 
+    /* 제목, 내용, 카테고리 입력 확인 */
     if (!form.title || !form.content || !form.category) {
       alert("제목, 내용, 카테고리를 모두 입력해주세요.");
       return;
     }
+    /* 로그인 확인 */
+    if (!userId) {
+      alert("로그인이 필요합니다.");
+      router.push("/login");
+      return;
+    }
+    /* 게시글 등록 */
+    try {
+      await createPost({
+        title: form.title,
+        content: form.content,
+        category: form.category,
+        userId: Number(userId),
+      });
 
-    // 게시글 등록 로직 (추후 백엔드 연동)
-    console.log("작성된 글:", form);
-
-    router.push("/board");
+      alert("게시글이 성공적으로 등록되었습니다.");
+      router.push("/board");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error("게시글 등록 에러:", err.message);
+        alert(err.message || "게시글 등록에 실패했습니다.");
+      } else {
+        alert("알 수 없는 오류가 발생했습니다.");
+      }
+    }
   };
 
   return (
@@ -72,9 +96,11 @@ export default function NewPostPage() {
               <SelectValue placeholder="카테고리를 선택하세요" />
             </SelectTrigger>
             <SelectContent className="absolute z-[9999] top-full mt-1 bg-white border rounded shadow-md">
-              <SelectItem value="잡담">잡담</SelectItem>
-              <SelectItem value="QNA">QNA</SelectItem>
-              <SelectItem value="복습">복습</SelectItem>
+              {Object.entries(Categories).map(([key, label]) => (
+                <SelectItem key={key} value={label}>
+                  {label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
