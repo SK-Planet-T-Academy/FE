@@ -6,8 +6,11 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+  const router = useRouter();
+
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -24,13 +27,22 @@ export default function LoginPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // TODO: 백엔드 연동
-    if (!form.email || !form.password) {
+    const { email, password } = form;
+
+    // 임시 계정 정보
+    const dummyEmail = "test@example.com";
+    const dummyPassword = "12345678";
+
+    if (!email || !password) {
       setError("이메일과 비밀번호를 모두 입력해주세요.");
       return;
     }
 
-    console.log("로그인 시도:", form);
+    if (email === dummyEmail && password === dummyPassword) {
+      router.push("/board");
+    } else {
+      setError("이메일 또는 비밀번호가 올바르지 않습니다.");
+    }
   };
 
   return (
