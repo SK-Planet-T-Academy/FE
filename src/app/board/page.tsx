@@ -28,7 +28,7 @@ export default function BoardPage() {
   const [showCalendar, setShowCalendar] = useState(false);
   const [likeModal, setLikeModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
-  const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set());
+  const [likedMap, setLikedMap] = useState<Record<number, Set<string>>>({});
 
   const [posts, setPosts] = useState<Post[]>([
     {
@@ -68,8 +68,10 @@ export default function BoardPage() {
       format(selectedDate, "yyyy-MM-dd")
   );
 
-  const handleLike = (id: number) => {
-    if (likedPosts.has(id)) {
+  const handleLike = (postId: number) => {
+    const alreadyLiked = likedMap[postId]?.has(userId);
+
+    if (alreadyLiked) {
       setModalMessage("이미 좋아요를 누르셨습니다.");
       setLikeModal(true);
       return;
@@ -77,10 +79,17 @@ export default function BoardPage() {
 
     setPosts((prev) =>
       prev.map((post) =>
-        post.id === id ? { ...post, likes: post.likes + 1 } : post
+        post.id === postId ? { ...post, likes: post.likes + 1 } : post
       )
     );
-    setLikedPosts((prev) => new Set(prev).add(id));
+
+    setLikedMap((prev) => {
+      const updated = { ...prev };
+      if (!updated[postId]) updated[postId] = new Set();
+      updated[postId].add(userId);
+      return updated;
+    });
+
     setModalMessage("좋아요가 등록되었습니다!");
     setLikeModal(true);
   };
