@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
@@ -9,7 +10,9 @@ export default function NewPostPage() {
   const router = useRouter();
   const [form, setForm] = useState({ title: "", content: "" });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
@@ -22,10 +25,10 @@ export default function NewPostPage() {
       return;
     }
 
-    // TODO: 여기에 게시글 등록 로직 추가 (백엔드 또는 상태 저장)
+    // TODO: 게시글 등록 로직 추가
     console.log("작성된 글:", form);
 
-    router.push("/board"); // 등록 후 게시판으로 이동
+    router.push("/board");
   };
 
   return (
@@ -43,11 +46,13 @@ export default function NewPostPage() {
           onChange={handleChange}
           required
         />
-        <Input
+
+        <Textarea
           name="content"
           placeholder="내용을 입력하세요"
           value={form.content}
           onChange={handleChange}
+          rows={10}
           required
         />
 
