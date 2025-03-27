@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ko } from "date-fns/locale";
-import { Eye, Heart } from "lucide-react";
+import { Eye, Heart, User } from "lucide-react";
 import Image from "next/image";
 import { posts as initialPosts, Post } from "@/data/posts";
 
@@ -64,7 +64,7 @@ export default function BoardPage() {
   return (
     <div className="min-h-screen px-4 py-10 bg-gray-50">
       <div className="max-w-2xl mx-auto space-y-6 pb-20">
-        <h1 className="text-3xl font-bold text-center flex items-center justify-center gap-2">
+        <h1 className="text-3xl font-bold text-center flex items-center justify-center gap-2 relative">
           <Image
             src="/academy.png"
             alt="게시판 아이콘"
@@ -73,6 +73,15 @@ export default function BoardPage() {
             style={{ width: "auto", height: "auto" }}
           />
           ASAC 커뮤니티
+          {/* 마이페이지 버튼 */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className=" absolute right-0 top-1/2 -translate-y-1/2"
+            onClick={() => router.push("/mypage")}
+          >
+            <User size={28} />
+          </Button>
         </h1>
 
         <div className="space-y-4">
