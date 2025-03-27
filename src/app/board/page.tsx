@@ -52,14 +52,8 @@ export default function BoardPage() {
 
   return (
     <div className="min-h-screen px-4 py-10 bg-gray-50">
-      <div className="max-w-2xl mx-auto space-y-6">
+      <div className="max-w-2xl mx-auto space-y-6 pb-20">
         <h1 className="text-3xl font-bold text-center">📋 게시판</h1>
-
-        <div className="text-right">
-          <Button onClick={() => router.push("/board/add")}>
-            + 게시글 작성
-          </Button>
-        </div>
 
         <div className="space-y-4">
           {/* 🔽 게시글 목록 제목 + 날짜 선택 */}
@@ -70,8 +64,7 @@ export default function BoardPage() {
                 onClick={toggleCalendar}
                 className="text-sm text-muted-foreground hover:text-gray-500"
               >
-                📅
-                {format(selectedDate, "yyyy년 MM월 dd일", { locale: ko })}
+                📅 {format(selectedDate, "yyyy년 MM월 dd일", { locale: ko })}
               </button>
 
               {showCalendar && (
@@ -118,6 +111,14 @@ export default function BoardPage() {
           )}
         </div>
       </div>
+
+      {/* 하단 고정된 게시글 작성 버튼 */}
+      <Button
+        onClick={() => router.push("/board/add")}
+        className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-6 py-3 text-base shadow-md"
+      >
+        + 게시글 작성
+      </Button>
     </div>
   );
 }
