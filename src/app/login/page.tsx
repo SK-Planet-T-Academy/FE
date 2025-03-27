@@ -1,16 +1,17 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   ExclamationTriangleIcon,
   EyeOpenIcon,
   EyeClosedIcon,
 } from "@radix-ui/react-icons";
-import { useRouter } from "next/navigation";
+import { loginUser } from "@/api/auth/login";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -30,24 +31,21 @@ export default function LoginPage() {
     setError("");
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const { email, password } = form;
-
-    // 임시 계정 정보
-    const dummyEmail = "test@example.com";
-    const dummyPassword = "12345678";
 
     if (!email || !password) {
       setError("이메일과 비밀번호를 모두 입력해주세요.");
       return;
     }
 
-    if (email === dummyEmail && password === dummyPassword) {
+    try {
+      await loginUser({ email, password });
       router.push("/board");
-    } else {
-      setError("이메일 또는 비밀번호가 올바르지 않습니다.");
+    } catch (err: any) {
+      setError(err.message || "로그인에 실패했습니다.");
     }
   };
 
