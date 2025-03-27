@@ -5,7 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import {
+  ExclamationTriangleIcon,
+  EyeOpenIcon,
+  EyeClosedIcon,
+} from "@radix-ui/react-icons";
 
 export default function RegisterPage() {
   const [form, setForm] = useState({
@@ -15,7 +19,12 @@ export default function RegisterPage() {
     confirmPassword: "",
   });
 
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState("");
+
+  const togglePassword = () => setShowPassword((prev) => !prev);
+  const toggleConfirm = () => setShowConfirm((prev) => !prev);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -70,28 +79,58 @@ export default function RegisterPage() {
 
         <div className="space-y-2">
           <Label htmlFor="password">비밀번호</Label>
-          <Input
-            id="password"
-            name="password"
-            type="password"
-            placeholder="********"
-            value={form.password}
-            onChange={handleChange}
-            required
-          />
+          <div className="relative">
+            <Input
+              id="password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="********"
+              value={form.password}
+              onChange={handleChange}
+              required
+              className="pr-10"
+            />
+            <button
+              type="button"
+              onClick={togglePassword}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+              tabIndex={-1}
+            >
+              {showPassword ? (
+                <EyeClosedIcon className="w-4 h-4" />
+              ) : (
+                <EyeOpenIcon className="w-4 h-4" />
+              )}
+            </button>
+          </div>
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="confirmPassword">비밀번호 확인</Label>
-          <Input
-            id="confirmPassword"
-            name="confirmPassword"
-            type="password"
-            placeholder="********"
-            value={form.confirmPassword}
-            onChange={handleChange}
-            required
-          />
+          <div className="relative">
+            <Input
+              id="confirmPassword"
+              name="confirmPassword"
+              type={showConfirm ? "text" : "password"}
+              placeholder="********"
+              value={form.confirmPassword}
+              onChange={handleChange}
+              required
+              className="pr-10"
+            />
+            <button
+              type="button"
+              onClick={toggleConfirm}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+              tabIndex={-1}
+            >
+              {showConfirm ? (
+                <EyeClosedIcon className="w-4 h-4" />
+              ) : (
+                <EyeOpenIcon className="w-4 h-4" />
+              )}
+            </button>
+          </div>
         </div>
 
         {error && (
