@@ -1,17 +1,21 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import {
   ExclamationTriangleIcon,
   EyeOpenIcon,
   EyeClosedIcon,
 } from "@radix-ui/react-icons";
+import { registerUser } from "@/api/auth/register";
 
 export default function RegisterPage() {
+  const router = useRouter();
+
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -22,6 +26,7 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const togglePassword = () => setShowPassword((prev) => !prev);
   const toggleConfirm = () => setShowConfirm((prev) => !prev);
@@ -29,10 +34,11 @@ export default function RegisterPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
-    setError(""); // 입력할 때 에러 초기화
+    setError("");
+    setSuccess("");
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (form.password !== form.confirmPassword) {
@@ -40,8 +46,27 @@ export default function RegisterPage() {
       return;
     }
 
-    // TODO: 백엔드 연동
-    console.log("회원가입 데이터:", form);
+    try {
+      await registerUser({
+        name: form.name,
+        email: form.email,
+        password: form.password,
+      });
+
+      setSuccess("회원가입이 완료되었습니다!");
+      setForm({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      });
+
+      setTimeout(() => {
+        router.push("/login");
+      }, 1500);
+    } catch (err: any) {
+      setError(err.message || "회원가입 중 오류가 발생했습니다.");
+    }
   };
 
   return (
@@ -57,7 +82,7 @@ export default function RegisterPage() {
           <Input
             id="name"
             name="name"
-            placeholder="신강희짱"
+            placeholder="홍길동"
             value={form.name}
             onChange={handleChange}
             required
@@ -141,7 +166,14 @@ export default function RegisterPage() {
           </Alert>
         )}
 
-        <Button type="submit" className="w-full" variant="default">
+        {success && (
+          <Alert>
+            <AlertTitle>성공</AlertTitle>
+            <AlertDescription>{success}</AlertDescription>
+          </Alert>
+        )}
+
+        <Button type="submit" className="w-full">
           가입하기
         </Button>
 
