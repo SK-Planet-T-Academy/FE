@@ -7,16 +7,17 @@
 
 /* === 전역 컬러 변수 설정 === */
 :root {
-  --background: #f9fafb;
-  --foreground: #1f2937;
-  --primary: #4f46e5;
-  --primary-hover: #4338ca;
-  --muted: #6b7280;
+  --background: 210 20% 98%; /* #f9fafb */
+  --foreground: 222 47% 11%; /* #1f2937 */
+  --primary: 234 85% 64%; /* #4f46e5 */
+  --primary-hover: 245 58% 46%; /* #4338ca */
+  --primary-foreground: 0 0% 100%; /* #ffffff */
+  --muted: 220 9% 46%; /* #6b7280 */
 }
 
 /* === 기본 배경 & 폰트 스타일 === */
 body {
-  @apply bg-[--background] text-[--foreground] font-sans;
+  @apply bg-[hsl(var(--background))] text-[hsl(var(--foreground))] font-sans;
   font-family: "Pretendard Variable", sans-serif;
 }
 
@@ -26,5 +27,5 @@ h2,
 h3,
 h4,
 h5 {
-  @apply font-semibold text-[--foreground];
+  @apply font-semibold text-[hsl(var(--foreground))];
 }
