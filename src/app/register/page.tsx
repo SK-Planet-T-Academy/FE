@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 
 export default function RegisterPage() {
   const [form, setForm] = useState({
@@ -93,7 +95,11 @@ export default function RegisterPage() {
         </div>
 
         {error && (
-          <p className="text-sm text-destructive text-center">{error}</p>
+          <Alert variant="destructive">
+            <ExclamationTriangleIcon className="h-4 w-4" />
+            <AlertTitle>오류</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
         )}
 
         <Button type="submit" className="w-full" variant="default">
