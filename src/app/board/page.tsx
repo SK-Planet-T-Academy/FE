@@ -10,56 +10,18 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ko } from "date-fns/locale";
 import { Eye, Heart } from "lucide-react";
 import Image from "next/image";
-
-interface Post {
-  id: number;
-  title: string;
-  content: string;
-  date: string;
-  author: string;
-  views: number;
-  likes: number;
-}
+import { posts as initialPosts, Post } from "@/data/posts";
 
 export default function BoardPage() {
   const router = useRouter();
-  const userId = "user123"; // 임시 사용자 ID
+  const userId = "user123";
 
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [showCalendar, setShowCalendar] = useState(false);
   const [likeModal, setLikeModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [likedMap, setLikedMap] = useState<Record<number, Set<string>>>({});
-
-  const [posts, setPosts] = useState<Post[]>([
-    {
-      id: 1,
-      title: "첫 번째 게시글",
-      content: "게시판에 오신 것을 환영합니다!",
-      date: "2025-03-26",
-      author: "홍길동",
-      views: 120,
-      likes: 15,
-    },
-    {
-      id: 2,
-      title: "두 번째 게시글",
-      content: "이 게시판은 Next.js로 만들어졌어요.",
-      date: "2024-03-27",
-      author: "김영희",
-      views: 85,
-      likes: 8,
-    },
-    {
-      id: 3,
-      title: "오늘의 게시글",
-      content: "오늘 등록된 게시글입니다.",
-      date: format(new Date(), "yyyy-MM-dd"),
-      author: "이철수",
-      views: 22,
-      likes: 4,
-    },
-  ]);
+  const [posts, setPosts] = useState<Post[]>(initialPosts);
 
   const toggleCalendar = () => setShowCalendar((prev) => !prev);
 
@@ -159,6 +121,7 @@ export default function BoardPage() {
               return (
                 <Card
                   key={post.id}
+                  onClick={() => router.push(`/board/${post.id}`)}
                   className="transition-all duration-300 hover:shadow-lg hover:scale-[1.01] hover:cursor-pointer"
                 >
                   <CardContent className="p-4 space-y-2">
@@ -179,7 +142,10 @@ export default function BoardPage() {
                           {post.views}
                         </span>
                         <button
-                          onClick={() => handleLike(post.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleLike(post.id);
+                          }}
                           className="flex items-center gap-1 hover:text-red-500 transition"
                         >
                           <Heart
