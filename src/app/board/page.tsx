@@ -12,7 +12,7 @@ interface Post {
   id: number;
   title: string;
   content: string;
-  date: string; // ISO 문자열
+  date: string;
 }
 
 export default function BoardPage() {
