@@ -5,7 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import {
+  ExclamationTriangleIcon,
+  EyeOpenIcon,
+  EyeClosedIcon,
+} from "@radix-ui/react-icons";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
@@ -17,6 +21,8 @@ export default function LoginPage() {
   });
 
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const togglePassword = () => setShowPassword((prev) => !prev);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -68,15 +74,30 @@ export default function LoginPage() {
 
         <div className="space-y-2">
           <Label htmlFor="password">비밀번호</Label>
-          <Input
-            id="password"
-            name="password"
-            type="password"
-            placeholder="********"
-            value={form.password}
-            onChange={handleChange}
-            required
-          />
+          <div className="relative">
+            <Input
+              id="password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="********"
+              value={form.password}
+              onChange={handleChange}
+              required
+              className="pr-10"
+            />
+            <button
+              type="button"
+              onClick={togglePassword}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+              tabIndex={-1}
+            >
+              {showPassword ? (
+                <EyeClosedIcon className="w-4 h-4" />
+              ) : (
+                <EyeOpenIcon className="w-4 h-4" />
+              )}
+            </button>
+          </div>
         </div>
 
         {error && (
