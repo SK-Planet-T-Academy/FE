@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { format } from "date-fns";
-import { logoutUser } from "@/api/auth/logout"; // 🔸 로그아웃 API 임포트
-import { useRouter } from "next/navigation";
+import { logoutUser } from "@/api/auth/logout";
 import { getUserById } from "@/api/user/getUser";
+import { updateUser } from "@/api/user/updateUser";
 
 interface Post {
   id: number;
@@ -36,12 +37,32 @@ export default function MyPage() {
     "edit" | "posts" | "likes" | "comments"
   >("edit");
 
-  const [userInfo, setUserInfo] = useState<{
-    email: string;
-    name: string;
-  } | null>(null);
+  const [form, setForm] = useState({
+    email: "",
+    name: "",
+    password: "",
+  });
 
+  // 초기 유저 데이터 불러오기
   useEffect(() => {
+    const userId = localStorage.getItem("id");
+
+    if (!userId) {
+      router.push("/login");
+      return;
+    }
+
+    getUserById(userId)
+      .then((data) => {
+        setForm({ email: data.email, name: data.name, password: "" });
+      })
+      .catch((err) => {
+        console.error("유저 정보 조회 실패:", err);
+        alert("로그인이 필요합니다.");
+        router.push("/login");
+      });
+
+    // 더미 게시글/댓글
     const allPosts: Post[] = [
       {
         id: 1,
@@ -51,15 +72,6 @@ export default function MyPage() {
         author: "user123",
         views: 120,
         likes: 15,
-      },
-      {
-        id: 2,
-        title: "두 번째 게시글",
-        content: "이 게시판은 Next.js로 만들어졌어요.",
-        date: "2024-03-27",
-        author: "kim",
-        views: 85,
-        likes: 8,
       },
     ];
 
@@ -76,14 +88,7 @@ export default function MyPage() {
     setUserPosts(allPosts.filter((p) => p.author === "user123"));
     setLikedPosts(allPosts.filter((p) => [1].includes(p.id)));
     setComments(allComments.filter((c) => c.author === "user123"));
-
-    const userId = localStorage.getItem("id");
-    if (userId) {
-      getUserById(userId)
-        .then((data) => setUserInfo({ email: data.email, name: data.name }))
-        .catch((err) => console.error("유저 정보 조회 실패:", err));
-    }
-  }, []);
+  }, [router]);
 
   const handleLogout = async () => {
     const userId = localStorage.getItem("id");
@@ -92,24 +97,41 @@ export default function MyPage() {
       alert("로그인 상태가 아닙니다.");
       return;
     }
+
     try {
       const response = await logoutUser(Number(userId));
 
       if (response.isLogin === false) {
         localStorage.removeItem("id");
         localStorage.removeItem("isLogin");
-
         alert("로그아웃 되었습니다.");
         router.push("/login");
       } else {
         alert("로그아웃 상태를 확인할 수 없습니다.");
       }
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        alert(err.message);
-      } else {
-        alert("로그아웃 중 오류가 발생했습니다.");
-      }
+      alert(
+        err instanceof Error ? err.message : "로그아웃 중 오류가 발생했습니다."
+      );
+    }
+  };
+
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleUserUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const userId = localStorage.getItem("id");
+    if (!userId) return;
+
+    try {
+      await updateUser(Number(userId), form);
+      alert("정보가 저장되었습니다.");
+    } catch (err) {
+      console.error("유저 정보 수정 실패:", err);
+      alert("정보 수정 중 오류가 발생했습니다.");
     }
   };
 
@@ -123,47 +145,35 @@ export default function MyPage() {
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <Button
-          variant={activeSection === "edit" ? "default" : "outline"}
-          onClick={() => setActiveSection("edit")}
-        >
-          유저 정보 수정
-        </Button>
-        <Button
-          variant={activeSection === "posts" ? "default" : "outline"}
-          onClick={() => setActiveSection("posts")}
-        >
-          작성한 게시글
-        </Button>
-        <Button
-          variant={activeSection === "likes" ? "default" : "outline"}
-          onClick={() => setActiveSection("likes")}
-        >
-          좋아요한 게시글
-        </Button>
-        <Button
-          variant={activeSection === "comments" ? "default" : "outline"}
-          onClick={() => setActiveSection("comments")}
-        >
-          작성한 댓글
-        </Button>
+        {["edit", "posts", "likes", "comments"].map((section) => (
+          <Button
+            key={section}
+            variant={activeSection === section ? "default" : "outline"}
+            onClick={() => setActiveSection(section as typeof activeSection)}
+          >
+            {
+              {
+                edit: "유저 정보 수정",
+                posts: "작성한 게시글",
+                likes: "좋아요한 게시글",
+                comments: "작성한 댓글",
+              }[section]
+            }
+          </Button>
+        ))}
       </div>
 
       {activeSection === "edit" && (
         <section>
           <h2 className="text-xl font-semibold mb-4">✏️ 유저 정보 수정</h2>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              alert("정보가 저장되었습니다.");
-            }}
-            className="space-y-4"
-          >
+          <form onSubmit={handleUserUpdate} className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-1">이메일</label>
               <input
                 type="email"
-                defaultValue={userInfo?.email}
+                name="email"
+                value={form.email}
+                onChange={handleFormChange}
                 className="w-full border rounded-md px-3 py-2 text-sm"
               />
             </div>
@@ -171,7 +181,9 @@ export default function MyPage() {
               <label className="block text-sm font-medium mb-1">이름</label>
               <input
                 type="text"
-                defaultValue={userInfo?.name}
+                name="name"
+                value={form.name}
+                onChange={handleFormChange}
                 className="w-full border rounded-md px-3 py-2 text-sm"
               />
             </div>
@@ -179,6 +191,9 @@ export default function MyPage() {
               <label className="block text-sm font-medium mb-1">비밀번호</label>
               <input
                 type="password"
+                name="password"
+                value={form.password}
+                onChange={handleFormChange}
                 placeholder="새 비밀번호 입력"
                 className="w-full border rounded-md px-3 py-2 text-sm"
               />
