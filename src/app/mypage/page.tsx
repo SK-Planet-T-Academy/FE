@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { format } from "date-fns";
 import { logoutUser } from "@/api/auth/logout";
-import { getUserById } from "@/api/user/getUser";
-import { updateUser } from "@/api/user/updateUser";
+import { getUserById } from "@/api/user/get";
+import { updateUser } from "@/api/user/update";
 
 interface Post {
   id: number;
