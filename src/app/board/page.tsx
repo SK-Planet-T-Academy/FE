@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ko } from "date-fns/locale";
 import { Eye, Heart, User } from "lucide-react";
 import Image from "next/image";
-import { posts as initialPosts, Post } from "@/data/posts";
+import { fetchPosts, Post } from "@/api/posts/get";
 
 export default function BoardPage() {
   const router = useRouter();
@@ -21,13 +21,13 @@ export default function BoardPage() {
   const [likeModal, setLikeModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [likedMap, setLikedMap] = useState<Record<number, Set<string>>>({});
-  const [posts, setPosts] = useState<Post[]>(initialPosts);
+  const [posts, setPosts] = useState<Post[]>([]);
 
   const toggleCalendar = () => setShowCalendar((prev) => !prev);
 
   const filteredPosts = posts.filter(
     (post) =>
-      format(new Date(post.date), "yyyy-MM-dd") ===
+      format(new Date(post.createdAt), "yyyy-MM-dd") ===
       format(selectedDate, "yyyy-MM-dd")
   );
 
@@ -36,10 +36,10 @@ export default function BoardPage() {
 
     setPosts((prev) =>
       prev.map((post) => {
-        if (post.id !== postId) return post;
+        if (post.postId !== postId) return post;
         return {
           ...post,
-          likes: isLiked ? post.likes - 1 : post.likes + 1,
+          likes: isLiked ? post.likesCount - 1 : post.likesCount + 1,
         };
       })
     );
@@ -60,7 +60,11 @@ export default function BoardPage() {
     );
     setLikeModal(true);
   };
-
+  useEffect(() => {
+    fetchPosts()
+      .then(setPosts)
+      .catch((err) => console.error(err));
+  }, []);
   return (
     <div className="min-h-screen px-4 py-10 bg-gray-50">
       <div className="max-w-2xl mx-auto space-y-6 pb-20">
@@ -126,34 +130,34 @@ export default function BoardPage() {
             </p>
           ) : (
             filteredPosts.map((post) => {
-              const isLiked = likedMap[post.id]?.has(userId);
+              const isLiked = likedMap[post.postId]?.has(userId);
               return (
                 <Card
-                  key={post.id}
-                  onClick={() => router.push(`/board/${post.id}`)}
+                  key={post.postId}
+                  onClick={() => router.push(`/board/${post.postId}`)}
                   className="transition-all duration-300 hover:shadow-lg hover:scale-[1.01] hover:cursor-pointer"
                 >
                   <CardContent className="p-4 space-y-2">
                     <div className="flex justify-between items-center">
                       <h3 className="font-bold text-lg">{post.title}</h3>
                       <span className="text-xs text-gray-500">
-                        {format(new Date(post.date), "yyyy.MM.dd")}
+                        {format(new Date(post.createdAt), "yyyy.MM.dd")}
                       </span>
                     </div>
 
                     <p className="text-sm text-gray-600">{post.content}</p>
 
                     <div className="flex justify-between items-center text-sm text-muted-foreground">
-                      <span>작성자: {post.author}</span>
+                      <span>작성자: {post.user.name}</span>
                       <div className="flex items-center gap-3">
                         <span className="flex items-center gap-1">
                           <Eye className="w-4 h-4" />
-                          {post.views}
+                          {post.viewsCount}
                         </span>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleLike(post.id);
+                            handleLike(post.postId);
                           }}
                           className="flex items-center gap-1 hover:text-red-500 transition"
                         >
@@ -162,7 +166,7 @@ export default function BoardPage() {
                               isLiked ? "fill-red-500 text-red-500" : ""
                             }`}
                           />
-                          {post.likes}
+                          {post.likesCount}
                         </button>
                       </div>
                     </div>
