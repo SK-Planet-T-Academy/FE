@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ko } from "date-fns/locale";
 import { Eye, Heart } from "lucide-react";
+import Image from "next/image";
 
 interface Post {
   id: number;
@@ -101,7 +102,16 @@ export default function BoardPage() {
   return (
     <div className="min-h-screen px-4 py-10 bg-gray-50">
       <div className="max-w-2xl mx-auto space-y-6 pb-20">
-        <h1 className="text-3xl font-bold text-center">📋 게시판</h1>
+        <h1 className="text-3xl font-bold text-center flex items-center justify-center gap-2">
+          <Image
+            src="/academy.png"
+            alt="게시판 아이콘"
+            width={40}
+            height={40}
+            style={{ width: "auto", height: "auto" }}
+          />
+          ASAC 커뮤니티
+        </h1>
 
         <div className="space-y-4">
           <div className="flex justify-between items-center flex-wrap gap-2">
@@ -149,7 +159,7 @@ export default function BoardPage() {
               return (
                 <Card
                   key={post.id}
-                  className="transition-all duration-300 hover:shadow-lg hover:scale-[1.01]"
+                  className="transition-all duration-300 hover:shadow-lg hover:scale-[1.01] hover:cursor-pointer"
                 >
                   <CardContent className="p-4 space-y-2">
                     <div className="flex justify-between items-center">
