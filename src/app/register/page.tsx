@@ -13,13 +13,21 @@ export default function RegisterPage() {
     confirmPassword: "",
   });
 
+  const [error, setError] = useState("");
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+    setError(""); // 입력할 때 에러 초기화
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (form.password !== form.confirmPassword) {
+      setError("비밀번호가 일치하지 않습니다.");
+      return;
+    }
 
     // TODO: 백엔드 연동
     console.log("회원가입 데이터:", form);
@@ -84,8 +92,12 @@ export default function RegisterPage() {
           />
         </div>
 
-        <Button type="submit" className="w-full">
-          회원가입
+        {error && (
+          <p className="text-sm text-destructive text-center">{error}</p>
+        )}
+
+        <Button type="submit" className="w-full" variant="default">
+          가입하기
         </Button>
 
         <p className="text-sm text-center text-muted-foreground">
