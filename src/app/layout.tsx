@@ -1,8 +1,9 @@
-// app/layout.tsx
 import "@/styles/globals.css";
 import { cn } from "@/lib/utils";
 import { Inter } from "next/font/google";
 import { Metadata } from "next";
+import { Suspense } from "react";
+import Spinner from "@/components/ui/spinner"; // 🔹 Spinner 컴포넌트 import
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,8 +25,16 @@ export default function RootLayout({
           inter.className
         )}
       >
-        {/* 여기에 Navbar 등 공통 UI 들어갈 수 있음 */}
-        {children}
+        {/* 전역 Suspense로 로딩 스피너 처리 */}
+        <Suspense
+          fallback={
+            <div className="min-h-screen flex items-center justify-center">
+              <Spinner size="lg" />
+            </div>
+          }
+        >
+          {children}
+        </Suspense>
       </body>
     </html>
   );
