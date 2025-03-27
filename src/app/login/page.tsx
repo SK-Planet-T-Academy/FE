@@ -43,6 +43,9 @@ export default function LoginPage() {
 
     try {
       await loginUser({ email, password });
+      localStorage.setItem("email", email);
+      localStorage.setItem("password", password);
+      localStorage.setItem("isLogin", "true");
       router.push("/board");
     } catch (err: unknown) {
       if (err instanceof Error) {
