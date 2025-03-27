@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ko } from "date-fns/locale";
-import { Eye, Heart, HeartIcon } from "lucide-react";
+import { Eye, Heart } from "lucide-react";
 
 interface Post {
   id: number;
