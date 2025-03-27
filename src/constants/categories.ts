@@ -1,7 +1,8 @@
 export const Categories = {
-  CHAT: "잡담",
-  QNA: "QNA",
-  REVIEW: "복습",
+  SPORTS: "SPORTS",
+  TECHNOLOGY: "TECHNOLOGY",
+  LIFESTYLE: "LIFESTYLE",
+  ENTERTAINMENT: "ENTERTAINMENT",
 } as const;
 
 export type CategoryKey = keyof typeof Categories;
