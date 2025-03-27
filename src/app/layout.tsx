@@ -7,7 +7,7 @@ import { Metadata } from "next";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Community App",
+  title: "ASAC 교육 커뮤니티",
   description: "회원가입, 로그인, 게시판이 포함된 Next.js + shadcn 사이트",
 };
 
