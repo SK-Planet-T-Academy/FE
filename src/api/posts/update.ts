@@ -9,7 +9,7 @@ export async function updatePost(postId: number, payload: UpdatePostPayload) {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/api/post/${postId}`,
       {
-        method: "PATCH",
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },

@@ -1,50 +1,124 @@
+// src/app/board/[id]/page.tsx
 "use client";
 
 import { useParams } from "next/navigation";
-import { format } from "date-fns";
 import { useEffect, useState } from "react";
-import { posts, comments, Post, Comment } from "@/data/posts";
+import { format } from "date-fns";
+import { getPostById } from "@/api/posts/getById";
+import { createComment } from "@/api/comments/create";
+import { updatePost } from "@/api/posts/update";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 
+interface Comment {
+  commentId: number;
+  postId: number;
+  author: string;
+  content: string;
+  createdAt: string;
+}
+
+interface Post {
+  postId: number;
+  state: boolean;
+  title: string;
+  content: string;
+  likesCount: number;
+  commentsCount: number;
+  viewsCount: number;
+  user: {
+    id: number;
+    email: string;
+    name: string;
+    isLogin: boolean;
+  };
+  category: string;
+  createdAt: string;
+  updatedAt: string;
+  comments: Comment[];
+}
+
 export default function PostDetailPage() {
-  const params = useParams();
-  const postId = Number(params.id);
+  const { id } = useParams();
+  const postId = Number(id);
 
   const [post, setPost] = useState<Post | null>(null);
-  const [relatedComments, setRelatedComments] = useState<Comment[]>([]);
   const [showCommentForm, setShowCommentForm] = useState(false);
-  const [newComment, setNewComment] = useState({
-    author: "",
+  const [newComment, setNewComment] = useState({ content: "" });
+  const [editMode, setEditMode] = useState(false);
+  const [editForm, setEditForm] = useState({
+    title: "",
     content: "",
+    category: "",
   });
 
+  const userId =
+    typeof window !== "undefined" ? localStorage.getItem("id") : null;
+
   useEffect(() => {
-    const foundPost = posts.find((p) => p.id === postId);
-    const filteredComments = comments.filter((c) => c.postId === postId);
-    setPost(foundPost ?? null);
-    setRelatedComments(filteredComments);
+    async function fetchPost() {
+      try {
+        const data = await getPostById(postId);
+        setPost(data);
+        setEditForm({
+          title: data.title,
+          content: data.content,
+          category: data.category,
+        });
+      } catch (err) {
+        console.error("게시글 조회 실패:", err);
+      }
+    }
+    fetchPost();
   }, [postId]);
 
-  const handleAddComment = () => {
-    if (!newComment.author || !newComment.content) {
-      alert("작성자와 내용을 모두 입력해주세요.");
+  const handleAddComment = async () => {
+    if (!userId || !newComment.content) {
+      alert("로그인 후 내용을 입력해주세요.");
       return;
     }
 
-    const newCommentData: Comment = {
-      id: Math.floor(Math.random() * 100000),
-      postId,
-      author: newComment.author,
-      content: newComment.content,
-      createdAt: new Date().toISOString(),
-    };
+    try {
+      const response = await createComment({
+        content: newComment.content,
+        userId: Number(userId),
+        postId,
+      });
 
-    setRelatedComments((prev) => [...prev, newCommentData]);
-    setNewComment({ author: "", content: "" });
-    setShowCommentForm(false);
+      const addedComment: Comment = {
+        commentId: response.commentId,
+        postId,
+        author: response.post.user.name,
+        content: response.content,
+        createdAt: response.create_at,
+      };
+
+      setPost((prev) =>
+        prev
+          ? { ...prev, comments: [...(prev.comments || []), addedComment] }
+          : null
+      );
+
+      setNewComment({ content: "" });
+      setShowCommentForm(false);
+    } catch (err) {
+      console.error("댓글 작성 실패:", err);
+      alert("댓글 작성에 실패했습니다.");
+    }
+  };
+
+  const handleUpdatePost = async () => {
+    try {
+      const response = await updatePost(postId, editForm);
+      alert("게시글이 수정되었습니다.");
+      setPost((prev) => (prev ? { ...prev, ...response } : prev));
+      setEditMode(false);
+    } catch (err) {
+      console.error("게시글 수정 실패:", err);
+      alert("게시글 수정에 실패했습니다.");
+    }
   };
 
   if (!post) {
@@ -55,36 +129,81 @@ export default function PostDetailPage() {
     );
   }
 
+  const isAuthor = userId && post.user.id === Number(userId);
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-10 space-y-6">
-      <h1 className="text-3xl font-bold">{post.title}</h1>
-      <p className="text-sm text-muted-foreground">
-        작성자: {post.author} | 작성일:{" "}
-        {format(new Date(post.date), "yyyy.MM.dd")}
-      </p>
-      <p className="text-base text-gray-700 whitespace-pre-line">
-        {post.content}
-      </p>
+      {editMode ? (
+        <div className="space-y-4">
+          <Input
+            value={editForm.title}
+            onChange={(e) =>
+              setEditForm((prev) => ({ ...prev, title: e.target.value }))
+            }
+            placeholder="제목을 입력하세요"
+          />
+          <Textarea
+            value={editForm.content}
+            onChange={(e) =>
+              setEditForm((prev) => ({ ...prev, content: e.target.value }))
+            }
+            rows={10}
+          />
+          <Input
+            value={editForm.category}
+            onChange={(e) =>
+              setEditForm((prev) => ({ ...prev, category: e.target.value }))
+            }
+            placeholder="카테고리"
+          />
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setEditMode(false)}>
+              취소
+            </Button>
+            <Button onClick={handleUpdatePost}>저장</Button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <h1 className="text-3xl font-bold">{post.title}</h1>
+          <p className="text-sm text-muted-foreground">
+            작성자: {post.user.name} | 작성일:{" "}
+            {format(new Date(post.createdAt), "yyyy.MM.dd")}
+          </p>
+          <p className="text-base text-gray-700 whitespace-pre-line">
+            {post.content}
+          </p>
+          {isAuthor && (
+            <div className="flex justify-end">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setEditMode(true)}
+              >
+                게시글 수정
+              </Button>
+            </div>
+          )}
+        </>
+      )}
 
       <hr />
 
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-semibold">💬 댓글</h2>
-          <Button size="sm" onClick={() => setShowCommentForm((prev) => !prev)}>
-            {showCommentForm ? "취소" : "댓글 작성하기"}
-          </Button>
+          {!isAuthor && (
+            <Button
+              size="sm"
+              onClick={() => setShowCommentForm((prev) => !prev)}
+            >
+              {showCommentForm ? "취소" : "댓글 작성하기"}
+            </Button>
+          )}
         </div>
 
-        {showCommentForm && (
+        {!isAuthor && showCommentForm && (
           <div className="space-y-2 border p-4 rounded-md">
-            <Input
-              placeholder="작성자"
-              value={newComment.author}
-              onChange={(e) =>
-                setNewComment((prev) => ({ ...prev, author: e.target.value }))
-              }
-            />
             <Textarea
               placeholder="댓글을 입력하세요"
               value={newComment.content}
@@ -101,11 +220,11 @@ export default function PostDetailPage() {
           </div>
         )}
 
-        {relatedComments.length === 0 ? (
+        {post.comments?.length === 0 ? (
           <p className="text-sm text-muted-foreground">댓글이 없습니다.</p>
         ) : (
-          relatedComments.map((comment) => (
-            <Card key={comment.id}>
+          post.comments?.map((comment) => (
+            <Card key={comment.commentId}>
               <CardContent className="py-2 space-y-1">
                 <p className="text-sm font-medium">{comment.author}</p>
                 <p className="text-sm text-gray-600">{comment.content}</p>
