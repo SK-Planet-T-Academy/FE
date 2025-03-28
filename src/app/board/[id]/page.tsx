@@ -113,7 +113,19 @@ export default function PostDetailPage() {
     try {
       const response = await updatePost(postId, editForm);
       alert("게시글이 수정되었습니다.");
-      setPost((prev) => (prev ? { ...prev, ...response } : prev));
+      setPost((prev) =>
+        prev &&
+        response &&
+        typeof response === "object" &&
+        !Array.isArray(response)
+          ? {
+              ...prev,
+              ...(typeof response === "object" && !Array.isArray(response)
+                ? response
+                : {}),
+            }
+          : prev
+      );
       setEditMode(false);
     } catch (err) {
       console.error("게시글 수정 실패:", err);
